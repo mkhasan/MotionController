@@ -1,4 +1,50 @@
+import math
+import can
+import time
+from tinymovr.tee import init_tee
+from tinymovr.config import get_bus_config, create_device
+
+import time
+import datetime;
+from datetime import datetime
+import pickle
 from params import pkl_filename
 
+from common import TravelData
+import pickle
+from params import pkl_filename
+
+import matplotlib.pyplot as plt
+import numpy as np
+
+
+from params import pkl_filename, bitrate
+
 if __name__ == "__main__":
-    with
+
+
+    #travelData = TravelData(0, 0, 0)
+    with open(pkl_filename, 'rb') as f:
+        travelData = pickle.load(f)
+
+    #print(travelData.torque)
+    #print(travelData.ts)
+    #print(travelData.enc)
+    #print(travelData.init_enc)
+    #print(travelData.transitions)
+
+    initTime = travelData.ts[0]
+    ts = [item-initTime for item in travelData.ts]
+    t_gap = [100.0*(ts[k+1] - ts[k]) for k in range(len(ts)-1)]
+    print(np.std(t_gap))
+    enc = [item - travelData.init_enc for item in travelData.enc]
+
+    maxVal = np.max(enc)
+    print(maxVal)
+    line = np.arange(len(ts))
+    plt.plot(line, travelData.velocity)
+
+    plt.plot(line, [item * maxVal for item in travelData.torque])
+    plt.show()
+
+    

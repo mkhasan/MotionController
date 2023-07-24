@@ -9,14 +9,16 @@ import time
 import datetime;
 from datetime import datetime
 import pickle
-from params import pkl_filename
+from params import pkl_filename, bitrate
+from common import TravelData
 
 
-bitrate = 1000000
+
 #init_tee(can.Bus(**params))
 #tm = create_device(node_id=1)
 
 #tm.controller.calibrate()
+
 
 sleepTimeMs = 100
 if __name__ == "__main__":
@@ -29,7 +31,7 @@ if __name__ == "__main__":
 
     maxCount = 50;
 
-    transitions = [5, 16, maxCount+1]
+    transitions = [5, 35, maxCount+1]
 
     transitionIndex = 0
 
@@ -47,8 +49,10 @@ if __name__ == "__main__":
     tm2.controller.current.Iq_setpoint=0
     tm2.controller.current_mode()
 
-    start_enc = tm2.encoder.position_estimate
-    enc_rec = []
+    start_enc = tm1.encoder.position_estimate
+
+    travelData = TravelData(float(start_enc.m), transitions, maxTorque)
+
     for count in range(maxCount):
         if count >= transitions[transitionIndex]:
             turn = 1-turn
@@ -61,20 +65,25 @@ if __name__ == "__main__":
             tm2.controller.current.Iq_setpoint=currTorque
             print("count: %d torque: %f" % (count, currTorque) )
 
-        enc = tm2.encoder.position_estimate
-        enc_rec.append(enc)
+        enc = tm1.encoder.position_estimate
+        vel = tm1.encoder.velocity_estimate
+
         prev = turn
         ct = datetime.now()
         ts = ct.timestamp()
+
+        travelData.append(ts, float(enc.m), float(vel.m), currTorque)
         #print("", end=" ")
         print(ts, end=": ")
-        print(enc-start_enc)
+        print(enc)
         time.sleep(sleepTimeMs/1000.0)
 
     tm1.controller.idle()
     tm2.controller.idle()
 
-    enc_rec = [item-start_enc for item in enc_rec]
-    print(enc_rec)
+
+
     with open(pkl_filename, 'wb') as f:
-        pickle.dump(enc_rec, f)
+        pickle.dump(travelData, f)
+        f.close()
+        print("done")
