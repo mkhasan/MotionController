@@ -1,9 +1,4 @@
 import math
-import can
-import time
-from tinymovr.tee import init_tee
-from tinymovr.config import get_bus_config, create_device
-
 import time
 import datetime;
 from datetime import datetime
@@ -35,16 +30,30 @@ if __name__ == "__main__":
 
     initTime = travelData.ts[0]
     ts = [item-initTime for item in travelData.ts]
-    t_gap = [100.0*(ts[k+1] - ts[k]) for k in range(len(ts)-1)]
-    print(np.std(t_gap))
+    t_gap = [1.0*(ts[k+1] - ts[k]) for k in range(len(ts)-1)]
+    print(np.mean(t_gap))
     enc = [item - travelData.init_enc for item in travelData.enc]
 
     maxVal = np.max(enc)
     print(maxVal)
     line = np.arange(len(ts))
-    plt.plot(line, travelData.velocity)
+    #plt.plot(line, travelData.velocity)
 
-    plt.plot(line, [item * maxVal for item in travelData.torque])
-    plt.show()
+    #plt.plot(line, [item * maxVal for item in travelData.torque])
+    #plt.show()
+
+    with open("torque.pkl", "wb") as file:
+        pickle.dump(travelData.torque, file)
+
+    with open("velocity.pkl", "wb") as file:
+        pickle.dump(travelData.velocity, file)
+
+    with open("enc.pkl", "wb") as file:
+        pickle.dump(enc, file)
+
+
+    print(travelData.velocity)
+
+
 
     
