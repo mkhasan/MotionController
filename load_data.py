@@ -1,4 +1,5 @@
 import math
+import sys
 import time
 import datetime;
 from datetime import datetime
@@ -17,9 +18,10 @@ from params import pkl_filename, bitrate
 
 if __name__ == "__main__":
 
-
+    basename = sys.argv[1]
+    filename = basename + ".pkl"
     #travelData = TravelData(0, 0, 0)
-    with open(pkl_filename, 'rb') as f:
+    with open(filename, 'rb') as f:
         travelData = pickle.load(f)
 
     #print(travelData.torque)
@@ -34,25 +36,27 @@ if __name__ == "__main__":
     print(np.mean(t_gap))
     enc = [item - travelData.init_enc for item in travelData.enc]
 
-    maxVal = np.max(enc)
+    maxVal = np.max(travelData.velocity)
     print(maxVal)
     line = np.arange(len(ts))
-    #plt.plot(line, travelData.velocity)
+    plt.plot(line, enc)
 
-    #plt.plot(line, [item * maxVal for item in travelData.torque])
-    #plt.show()
+    plt.plot(line, [item * maxVal for item in travelData.torque])
+    plt.show()
 
-    with open("torque.pkl", "wb") as file:
-        pickle.dump(travelData.torque, file)
-
-    with open("velocity.pkl", "wb") as file:
-        pickle.dump(travelData.velocity, file)
-
-    with open("enc.pkl", "wb") as file:
-        pickle.dump(enc, file)
+    attrs = ['torque', 'velocity', 'enc']
+    values = [travelData.torque, travelData.velocity, enc]
 
 
-    print(travelData.velocity)
+
+
+    for atrr, value in zip(attrs, values):
+        output_filename = "out_%s_%s.pkl" % (basename, atrr)
+        with open(output_filename, "wb") as file:
+            pickle.dump(value, file)
+
+
+
 
 
 
