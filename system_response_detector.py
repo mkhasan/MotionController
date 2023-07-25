@@ -1,5 +1,7 @@
 
 import math
+import sys
+
 import can
 import time
 from tinymovr.tee import init_tee
@@ -29,15 +31,23 @@ if __name__ == "__main__":
     tm1 = create_device(node_id=1)
     tm2 = create_device(node_id=2)
 
-    maxCount = 50;
+    maxCount = 100;
 
-    transitions = [5, 35, maxCount+1]
+    transitions = [5, 20, 30, 40, 50, 65, 70, 80, 95, maxCount+1]
+
+    torquePreset = [2.0, 2.5, 4.0, -2.5, 4.0, 2.5, -3.5, -2.0, 0.0, 0.0]
 
     transitionIndex = 0
 
 
 
-    maxTorque = 1.0
+    id = '0'
+    if len(sys.argv) > 1:
+        id = sys.argv[1]
+
+    filename = "test_%s.pkl" % id
+
+    maxTorque = 2.0
 
     currTorque = 0.0
     turn = 0
@@ -55,20 +65,18 @@ if __name__ == "__main__":
 
     for count in range(maxCount):
         if count >= transitions[transitionIndex]:
-            turn = 1-turn
-            transitionIndex += 1
 
-
-        if (prev != turn):
-            currTorque = turn*maxTorque
+            currTorque = torquePreset[transitionIndex]
             tm1.controller.current.Iq_setpoint=currTorque
             tm2.controller.current.Iq_setpoint=currTorque
+            transitionIndex += 1
             print("count: %d torque: %f" % (count, currTorque) )
+
 
         enc = tm1.encoder.position_estimate
         vel = tm1.encoder.velocity_estimate
 
-        prev = turn
+
         ct = datetime.now()
         ts = ct.timestamp()
 
@@ -83,7 +91,7 @@ if __name__ == "__main__":
 
 
 
-    with open(pkl_filename, 'wb') as f:
+    with open(filename, 'wb') as f:
         pickle.dump(travelData, f)
         f.close()
         print("done")

@@ -39,7 +39,7 @@ if __name__ == "__main__":
     maxVal = np.max(travelData.velocity)
     print(maxVal)
     line = np.arange(len(ts))
-    plt.plot(line, enc)
+    plt.plot(line, travelData.velocity)
 
     plt.plot(line, [item * maxVal for item in travelData.torque])
     plt.show()
