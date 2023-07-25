@@ -35,7 +35,11 @@ if __name__ == "__main__":
 
     transitions = [5, 20, 30, 40, 50, 65, 70, 80, 95, maxCount+1]
 
-    torquePreset = [2.0, 2.5, 4.0, -2.5, 4.0, 2.5, -3.5, -2.0, 0.0, 0.0]
+
+    #torquePreset = []
+    #for i in range(len(transitions)):
+    #    torquePreset.append(targetTorque)
+    torquePreset = [-0.5, 0.5, 1.5, -1.0, -1.0, 0.5, 1.5, 1.0, 0.0, 0.0]
 
     transitionIndex = 0
 
@@ -83,7 +87,7 @@ if __name__ == "__main__":
         travelData.append(ts, float(enc.m), float(vel.m), currTorque)
         #print("", end=" ")
         print(ts, end=": ")
-        print(enc)
+        print(vel)
         time.sleep(sleepTimeMs/1000.0)
 
     tm1.controller.idle()
