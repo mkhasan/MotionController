@@ -77,9 +77,9 @@ if __name__ == "__main__":
     while(count < maxCount):
 
         if (dir > 0):
-            currVelocity = tm1.encoder.velocity_estimate
-        else:
             currVelocity = tm2.encoder.velocity_estimate
+        else:
+            currVelocity = tm1.encoder.velocity_estimate
 
         #vel = streamingMovingAverage.process(float(currVelocity.m))
         vel = currVelocity.m

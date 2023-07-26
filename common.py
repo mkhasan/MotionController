@@ -28,3 +28,16 @@ class StreamingMovingAverage:
         if len(self.values) > self.window_size:
             self.sum -= self.values.pop(0)
         return float(self.sum) / len(self.values)
+
+class Trajectory:
+    def __init__(self):
+        self.ts = []
+        self.curr_v = []
+        self.target_v = []
+        self.u = []
+    def Set(self, ts, curr_v, target_v, u):
+        self.ts.append(ts)
+        self.curr_v.append(curr_v)
+        self.target_v.append(target_v)
+        self.u.append(u)
+
