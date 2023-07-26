@@ -12,7 +12,7 @@ import datetime;
 from datetime import datetime
 import pickle
 from params import pkl_filename, bitrate
-from common import TravelData
+from common import TravelData, StreamingMovingAverage
 
 
 
@@ -22,29 +22,40 @@ from common import TravelData
 #tm.controller.calibrate()
 
 
-sleepTimeMs = 10
+sleepTimeMs = 1
 
 ct = datetime.now()
 prev = ct.timestamp()
 
 P_gain = 2.389411601e-5
-I_gain = 0.0090678223466725
+#I_gain = 0.00906782
+I_gain = 0.0001
 
 proportionalError = 0.0;
 integralError = 0.0
 
-maxCount = 1000
+maxCount = 2000
 
-transitions = [50, 200, 600, maxCount+1]
-velocities = [20000.0, 30000, 0, 0]
+transitions = [50, 1500, 1800, maxCount+1]
+velocities = [20000.0, 16000, 0, 0]
 
 
 assert (len(transitions) == len(velocities))
 
 max_error = 50000.0
 max_integral_error = 50000
-max_u = 3.0;
+max_u = 6.0;
+
+streamingMovingAverage = StreamingMovingAverage(10)
+
+dir = 1;
 if __name__ == "__main__":
+    if len(sys.argv) > 1 and sys.argv[1] == "back":
+        dir = -1
+
+    for i in range(len(velocities)):
+        velocities[i] = velocities[i]*dir
+
     params = get_bus_config(["socketcan"])
     params["bitrate"] = bitrate
     init_tee(can.Bus(**params))
@@ -65,31 +76,38 @@ if __name__ == "__main__":
     u = 0.0
     while(count < maxCount):
 
-        vel = tm1.encoder.velocity_estimate
+        if (dir > 0):
+            currVelocity = tm1.encoder.velocity_estimate
+        else:
+            currVelocity = tm2.encoder.velocity_estimate
 
-        error = target-float(vel.m)
+        #vel = streamingMovingAverage.process(float(currVelocity.m))
+        vel = currVelocity.m
+
+        error = target-vel
         if (math.fabs(error) > max_error or integralError > max_integral_error):
             print(("Error exceedddddded (%lf %lf)!!!" % (error, integralError)));
         else:
             proportionalError = error;
-            integralError += error;
+            integralError += (error*0.0035);
             u = P_gain*proportionalError+I_gain*integralError
             if (math.fabs(u) < max_u):
                 tm1.controller.current.Iq_setpoint=u
                 tm2.controller.current.Iq_setpoint=u
                 pass
             else:
-                print("input too high vel: %lf u: %lf error: %lf integral error: %lf" % ( float(vel.m), u, error, integralError))
+                print("input too high vel: %lf u: %lf error: %lf integral error: %lf" % ( float(vel), u, error, integralError))
 
         if count > transitions[transitionIndex]:
             target = velocities[transitionIndex]
             transitionIndex += 1
 
 
-
-        print("count: %d curr velocity: %lf integral error: %lf target: %lf u: %lf" % (count, float(vel.m), integralError, target, u))
         ct = datetime.now()
         ts = ct.timestamp()
+
+        print(ts-prev, end=" - ")
+        print("count: %d curr velocity: %lf integral error: %lf target: %lf u: %lf" % (count, float(vel), integralError, target, u))
         #print("val: %lf" % 3.4e-2)
 
         prev = ts
