@@ -1,4 +1,6 @@
 
+import threading
+
 class TravelData:
     def __init__(self, init_enc, transitions, max_torque):
         self.init_enc = init_enc
@@ -40,4 +42,5 @@ class Trajectory:
         self.curr_v.append(curr_v)
         self.target_v.append(target_v)
         self.u.append(u)
+
 
