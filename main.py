@@ -26,7 +26,7 @@ if __name__ == "__main__":
     tm2 = create_device(node_id=2)
 
     MAX_VELOCITY = 150000
-    velocity = 5000
+    velocity = 20000
     step = 10000;
 
     both = False;
