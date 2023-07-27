@@ -36,7 +36,7 @@ I_gain = 0.0001
 proportionalError = 0.0;
 integralError = 0.0
 
-maxCount = 2000
+maxCount = 20000
 
 #transitions = [50, 1500, 1800, maxCount+1]
 #velocities = [20000.0, 16000, 0, 0]
@@ -80,63 +80,74 @@ if __name__ == "__main__":
 
     lock=_thread.allocate_lock()
     cmdHandler = CmdHandler(lock, min_velocity-10.0)
+    cmdHandler.start()
 
-    while(quit == False):
-        count = 0;
-        transitionIndex = 0
-        error = 0.0
-        vel = 0.0
-        target = 0.0
-        u = 0.0
-        while(count < maxCount and quit == False):
-            dir = 1 if target >= min_velocity else -1
-            if (dir > 0):
-                currVelocity = tm2.encoder.velocity_estimate
+
+    count = 0;
+    transitionIndex = 0
+    error = 0.0
+    vel = 0.0
+    target = 0.0
+    u = 0.0
+    while(count < maxCount and quit == False):
+        dir = -1 if target <= min_velocity else 1
+        if (dir > 0):
+            currVelocity = tm2.encoder.velocity_estimate
+        else:
+            currVelocity = tm1.encoder.velocity_estimate
+
+        #vel = streamingMovingAverage.process(float(currVelocity.m))
+        vel = currVelocity.m
+
+        error = target-vel
+        if (math.fabs(error) > max_error or integralError > max_integral_error):
+            print(("Error exceedddddded (%lf %lf)!!!" % (error, integralError)));
+            quit = True
+        else:
+            proportionalError = error;
+            integralError += (error*0.0035);
+            u = P_gain*proportionalError+I_gain*integralError
+            if (math.fabs(u) < max_u):
+                #tm1.controller.current.Iq_setpoint=u
+                #tm2.controller.current.Iq_setpoint=u
+                pass
             else:
-                currVelocity = tm1.encoder.velocity_estimate
+                print("input too high vel: %lf u: %lf error: %lf integral error: %lf" % ( float(vel), u, error, integralError))
+                quit = True
 
-            #vel = streamingMovingAverage.process(float(currVelocity.m))
-            vel = currVelocity.m
-
-            error = target-vel
-            if (math.fabs(error) > max_error or integralError > max_integral_error):
-                print(("Error exceedddddded (%lf %lf)!!!" % (error, integralError)));
-            else:
-                proportionalError = error;
-                integralError += (error*0.0035);
-                u = P_gain*proportionalError+I_gain*integralError
-                if (math.fabs(u) < max_u):
-                    tm1.controller.current.Iq_setpoint=u
-                    tm2.controller.current.Iq_setpoint=u
-                    pass
-                else:
-                    print("input too high vel: %lf u: %lf error: %lf integral error: %lf" % ( float(vel), u, error, integralError))
-
-            #if count > transitions[transitionIndex]:
-            #    target = velocities[transitionIndex]
-            #    transitionIndex += 1
+        #if count > transitions[transitionIndex]:
+        #    target = velocities[transitionIndex]
+        #    transitionIndex += 1
 
 
-            ct = datetime.now()
-            ts = ct.timestamp()
+        ct = datetime.now()
+        ts = ct.timestamp()
 
-            print(ts-prev, end=" - ")
-            print("count: %d curr velocity: %lf integral error: %lf target: %lf u: %lf" % (count, float(vel), integralError, target, u))
-            #print("val: %lf" % 3.4e-2)
+        #print(ts-prev, end=" - ")
+        #print("count: %d curr velocity: %lf integral error: %lf target: %lf u: %lf" % (count, float(vel), integralError, target, u))
+        #print("val: %lf" % 3.4e-2)
 
-            prev = ts
+        prev = ts
 
-            count += 1
+        count += 1
 
-            value = cmdHandler.GetValue()
+        value = cmdHandler.GetValue()
 
-            if (value < 0.5):
-                target = 0.0
-            elif value >= min_velocity and value <= max_velocity:
-                target = value
+        if (value < 0.5 and value > -0.5):
+            target = 0.0
+            print("target velo: %f" % target)
+        elif math.fabs(value) >= min_velocity and math.fabs(value) <= max_velocity:
+            target = value
+            print("target velo: %f" % target)
+        elif value < -0.5 and value > -1.5:
+            print("target velo: %f" % target)
+            quit = True
 
-            time.sleep(sleepTimeMs/1000.0)
 
+
+        time.sleep(sleepTimeMs/1000.0)
+
+    cmdHandler.quit = True
 
     tm1.controller.idle()
     tm2.controller.idle()

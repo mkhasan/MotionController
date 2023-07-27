@@ -3,7 +3,7 @@ import threading, time
 import _thread
 import sys
 
-quit = False
+
 
 class CmdHandler (threading.Thread):
     def __init__(self, lock, defaultValue):
@@ -11,6 +11,7 @@ class CmdHandler (threading.Thread):
         self.lock = lock
         self.value = 0.0
         self.defaultValue = defaultValue
+        self.quit = False
 
 
     def SetValue(self, value):
@@ -30,9 +31,6 @@ class CmdHandler (threading.Thread):
         global quit
         while(quit == False):
             vel = float(input("Enter target velocity (-1.0 to quit): "))
-
-            if vel < -0.5 and vel > -1.5:
-                quit = True
 
             self.SetValue(vel)
 
