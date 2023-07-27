@@ -36,8 +36,11 @@ integralError = 0.0
 
 maxCount = 2000
 
+#transitions = [50, 1500, 1800, maxCount+1]
+#velocities = [20000.0, 16000, 0, 0]
+
 transitions = [50, 1500, 1800, maxCount+1]
-velocities = [20000.0, 16000, 0, 0]
+velocities = [25000.0, 18000, 0, 0]
 
 
 assert (len(transitions) == len(velocities))

@@ -4,7 +4,7 @@ from common import Trajectory
 import matplotlib.pyplot as plt
 import numpy as np
 
-filename = "front1.txt"
+filename = "front.txt"
 if __name__ == "__main__":
 
     trajectory = Trajectory()
@@ -33,5 +33,6 @@ if __name__ == "__main__":
 
     plt.plot(trajectory.ts, trajectory.curr_v)
     plt.plot(trajectory.ts, trajectory.target_v)
+    #plt.plot(np.arange(len(gaps))[:1250], gaps[:1250])
     print(len(gaps))
     plt.show()

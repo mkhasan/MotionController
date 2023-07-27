@@ -13,12 +13,17 @@ bitrate = 1000000
 
 #tm.controller.calibrate()
 
+sleepTimeMs = 1
+
+ct = datetime.now()
+prev = ct.timestamp()
+
 
 if __name__ == "__main__":
     params = get_bus_config(["socketcan"])
     params["bitrate"] = bitrate
 
-    print(params)
+    #print(params)
 
 
     init_tee(can.Bus(**params))
@@ -31,8 +36,11 @@ if __name__ == "__main__":
 
     both = False;
 
-    while True:
-        inp = input("Enter your choise (s: single, d: double, g: go, 't' stop, '+' inc, '-' dec, 'x' exit, abs(val) > 500: valocity) ")
+    maxCount = 2000
+    count = 0
+    inp = 'g'
+    while count < maxCount:
+        #input("Enter your choise (s: single, d: double, g: go, 't' stop, '+' inc, '-' dec, 'x' exit, abs(val) > 500: valocity) ")
 
         if (inp == 'x'):
             exit(1)
@@ -55,9 +63,9 @@ if __name__ == "__main__":
                 tm1.controller.velocity.setpoint = velocity
                 tm1.controller.velocity_mode()
 
-            continue
+            #continue
 
-
+        inp = 0
 
         if (inp == 't'):
             tm2.controller.idle()
@@ -79,7 +87,7 @@ if __name__ == "__main__":
         try:
             val = int(inp)
         except:
-            print("Invalid input")
+            #print("Invalid input")
             val = 0
 
         finally:
@@ -87,3 +95,22 @@ if __name__ == "__main__":
                 print("Setting velocity to %d" % val )
                 velocity = val;
 
+        ct = datetime.now()
+        ts = ct.timestamp()
+
+        currVelocity = tm2.encoder.velocity_estimate
+        currVelocity = currVelocity.m
+
+        #print("val: %lf" % 3.4e-2)
+
+        print(ts-prev, end=" - ")
+        print("count: %d curr velocity: %lf integral error: %lf target: %lf u: %lf" % (count, float(currVelocity), 0.0, velocity, 0.0))
+
+
+        prev = ts
+
+        count += 1
+
+        time.sleep(sleepTimeMs/1000.0)
+
+    tm2.controller.idle()
