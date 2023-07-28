@@ -92,9 +92,9 @@ if __name__ == "__main__":
     while(count < maxCount and quit == False):
         dir = -1 if target <= min_velocity else 1
         if (dir > 0):
-            currVelocity = tm2.encoder.velocity_estimate
-        else:
             currVelocity = tm1.encoder.velocity_estimate
+        else:
+            currVelocity = tm2.encoder.velocity_estimate
 
         #vel = streamingMovingAverage.process(float(currVelocity.m))
         vel = currVelocity.m
@@ -108,8 +108,8 @@ if __name__ == "__main__":
             integralError += (error*0.0035);
             u = P_gain*proportionalError+I_gain*integralError
             if (math.fabs(u) < max_u):
-                #tm1.controller.current.Iq_setpoint=u
-                #tm2.controller.current.Iq_setpoint=u
+                tm1.controller.current.Iq_setpoint=u
+                tm2.controller.current.Iq_setpoint=u
                 pass
             else:
                 print("input too high vel: %lf u: %lf error: %lf integral error: %lf" % ( float(vel), u, error, integralError))
@@ -123,8 +123,8 @@ if __name__ == "__main__":
         ct = datetime.now()
         ts = ct.timestamp()
 
-        #print(ts-prev, end=" - ")
-        #print("count: %d curr velocity: %lf integral error: %lf target: %lf u: %lf" % (count, float(vel), integralError, target, u))
+        print(ts-prev, end=" - ", file=sys.stderr)
+        print("count: %d curr velocity: %lf integral error: %lf target: %lf u: %lf" % (count, float(vel), integralError, target, u), file=sys.stderr)
         #print("val: %lf" % 3.4e-2)
 
         prev = ts
@@ -141,13 +141,20 @@ if __name__ == "__main__":
             print("target velo: %f" % target)
         elif value < -0.5 and value > -1.5:
             print("target velo: %f" % target)
+            print("press any key to quit")
             quit = True
 
 
 
         time.sleep(sleepTimeMs/1000.0)
 
-    cmdHandler.quit = True
 
     tm1.controller.idle()
     tm2.controller.idle()
+
+    if (count >= maxCount):
+        print("max ite reached !!!")
+
+    cmdHandler.quit = True
+    cmdHandler.join()
+

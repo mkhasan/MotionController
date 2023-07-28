@@ -29,10 +29,15 @@ class CmdHandler (threading.Thread):
         return v
     def run(self):
         global quit
-        while(quit == False):
-            vel = float(input("Enter target velocity (-1.0 to quit): "))
+        while(self.quit == False):
+            try:
+                print("Enter target velocity (-1.0 to quit):", end=" ")
+                vel = float(input())
+                self.SetValue(vel)
+            except:
+                print("press a float value")
 
-            self.SetValue(vel)
+
 
 
 if __name__ == "__main__":
