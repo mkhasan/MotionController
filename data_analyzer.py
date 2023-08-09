@@ -31,8 +31,8 @@ if __name__ == "__main__":
 
     gaps = [trajectory.ts[k+1]-trajectory.ts[k] for k in range(len(trajectory.ts)-1)]
 
-    plt.plot(trajectory.ts, trajectory.curr_v)
-    plt.plot(trajectory.ts, trajectory.target_v)
-    #plt.plot(np.arange(len(gaps))[:1250], gaps[:1250])
+    #plt.plot(trajectory.ts, trajectory.curr_v)
+    #plt.plot(trajectory.ts, trajectory.target_v)
+    plt.plot(np.arange(len(gaps))[:1250], gaps[:1250])
     print(len(gaps))
     plt.show()
