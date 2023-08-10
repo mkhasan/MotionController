@@ -1,4 +1,5 @@
 import sys
+import numpy as np
 from common import Trajectory
 
 import matplotlib.pyplot as plt
@@ -33,6 +34,11 @@ if __name__ == "__main__":
 
     #plt.plot(trajectory.ts, trajectory.curr_v)
     #plt.plot(trajectory.ts, trajectory.target_v)
-    plt.plot(np.arange(len(gaps))[:1250], gaps[:1250])
+    level = np.copy(trajectory.curr_v)
+    print(level[level > 15000].shape)
+    print(np.shape)
+    plt.plot(level)
+    #plt.plot(np.arange(len(gaps))[300:1250], gaps[300:1250])
+
     print(len(gaps))
     plt.show()

@@ -89,6 +89,9 @@ if __name__ == "__main__":
     vel = 0.0
     target = 0.0
     u = 0.0
+    timer = 500
+    moveDir = 1.0
+    state = 0       # stopped
     while(count < maxCount and quit == False):
         dir = -1 if target <= min_velocity else 1
         if (dir > 0):
@@ -144,8 +147,20 @@ if __name__ == "__main__":
             print("press any key to quit")
             quit = True
 
+        elif timer == 0:
+            if state == 0:
+                target = 30000.0*moveDir
+                timer = 1000
+            else:
+                target = 0.0
+                moveDir = -1.0*moveDir
+                timer = 500
+
+            state = (1-state)
 
 
+
+        timer -= 1
         time.sleep(sleepTimeMs/1000.0)
 
 
