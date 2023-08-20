@@ -36,7 +36,7 @@ I_gain = 0.0001
 proportionalError = 0.0;
 integralError = 0.0
 
-maxCount = 20000
+maxCount = 200000
 
 #transitions = [50, 1500, 1800, maxCount+1]
 #velocities = [20000.0, 16000, 0, 0]

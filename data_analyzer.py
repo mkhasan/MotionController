@@ -37,8 +37,9 @@ if __name__ == "__main__":
     level = np.copy(trajectory.curr_v)
     print(level[level > 15000].shape)
     print(np.shape)
-    plt.plot(level)
-    #plt.plot(np.arange(len(gaps))[300:1250], gaps[300:1250])
+    #plt.plot(level)
+    r = slice(1000,3000)
+    plt.plot(np.arange(len(gaps[r])), gaps[r])
 
     print(len(gaps))
     plt.show()
